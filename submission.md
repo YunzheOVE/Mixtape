@@ -42,11 +42,11 @@ Association tables: `friendships` (User ↔ User), `song_tags` (Song ↔ Tag), `
 
 **`services/streak_service.py`** — Calculates and updates listening streaks. Core function: `update_listening_streak()` checks days since last listen and increments, holds, or resets the streak.
 
-**`services/feed_service.py`** — Queries recent `ListeningEvent` records for a user's friends. `get_friends_listening_now()` uses a `RECENT_THRESHOLD` of 24 hours and deduplicates to one entry per friend.
+**`services/feed_service.py`** — Queries recent `ListeningEvent` records for a user's friends. `get_friends_listening_now()` uses a `RECENT_THRESHOLD` of 30 minutes and deduplicates to one entry per friend.
 
 **`services/search_service.py`** — Searches songs by title or artist using a case-insensitive `ILIKE` query with an outer join on `song_tags`.
 
-**`services/notification_service.py`** — Creates `Notification` records. `add_to_playlist()` notifies the song's original sharer. `rate_song()` saves a rating. `get_notifications()` retrieves them ordered by most recent.
+**`services/notification_service.py`** — Creates `Notification` records. `add_to_playlist()` notifies the song's original sharer when a song is added to a playlist. `rate_song()` saves a rating and notifies the song's original sharer. `get_notifications()` retrieves them ordered by most recent.
 
 **`services/playlist_service.py`** — `get_playlist_songs()` queries songs joined through `playlist_entries`, ordered by `position` ascending.
 
