@@ -95,7 +95,7 @@ Read `streak_service.py` and immediately saw the condition on line 73: `elif day
 `datetime.weekday()` returns 6 for Sunday. The condition `today.weekday() != 6` evaluates to `False` on Sundays, which means the `elif` branch (which increments the streak) is never taken on Sundays. Instead it falls to `else` and resets the streak to 1. So any user who listens on a Sunday after listening on Saturday will lose their streak entirely, even though they listened on consecutive days.
 
 **Fix and side-effect check:**
-*(To be filled in after fix is applied)*
+Removed `and today.weekday() != 6` from the `elif` condition in `update_listening_streak()`. The condition is now simply `elif days_since_last == 1`, which correctly increments the streak for any consecutive-day listen including Sundays. Verified that the skip-day reset (`else` branch) still works correctly: simulated a 2-day gap and confirmed streak resets to 1. The fix is a 1-character change and touches only the streak increment branch.
 
 ---
 
@@ -111,7 +111,7 @@ Read `feed_service.py` and saw `RECENT_THRESHOLD = timedelta(hours=24)` on line 
 `RECENT_THRESHOLD` is set to `timedelta(hours=24)`, which is far too large for a "Friends Listening Now" feed. Someone who listened 23 hours ago (yesterday evening) would appear as currently active. The threshold should be a short window (e.g., 30 minutes) to reflect who is actually listening right now.
 
 **Fix and side-effect check:**
-*(To be filled in after fix is applied)*
+Changed `RECENT_THRESHOLD = timedelta(hours=24)` to `RECENT_THRESHOLD = timedelta(minutes=30)`. Verified that listening events from 78+ minutes ago no longer appear in the feed, while events from the past 17 minutes still do. The `get_activity_feed()` function is intentionally unaffected — it has no recency filter and is designed to show all recent activity regardless of time.
 
 ---
 
@@ -127,7 +127,7 @@ Read `search_service.py` and saw the `outerjoin(song_tags, Song.id == song_tags.
 The `outerjoin` on `song_tags` is needed to allow filtering by tags, but it causes the SQL to produce N rows per song (where N = number of tags). Without `.distinct()`, the results depend on SQLAlchemy's internal deduplication. The correct fix is to add `.distinct()` to the query so the SQL itself guarantees one row per song, regardless of how many tags it has.
 
 **Fix and side-effect check:**
-*(To be filled in after fix is applied)*
+Added `.distinct()` to the SQLAlchemy query in `search_songs()`, between the `.filter()` and `.all()` calls. This pushes `SELECT DISTINCT` to the SQL level, guaranteeing one row per song regardless of how many tag associations it has. Verified that searching for "Borough" (3-tag song) and "Uptown" (3-tag song) each return exactly 1 result, and that songs with 0 tags (no outerjoin rows) still appear correctly.
 
 ---
 
@@ -143,7 +143,7 @@ Compared `add_to_playlist()` and `rate_song()` in `notification_service.py` side
 The `rate_song()` function in `notification_service.py` is missing the `create_notification()` call entirely. It validates the score, saves or updates the Rating record, and returns — but never notifies the original song sharer that someone rated their song. The pattern for notifying exists in `add_to_playlist()` but was never added to `rate_song()`.
 
 **Fix and side-effect check:**
-*(To be filled in after fix is applied)*
+Added a `create_notification()` call at the end of `rate_song()`, mirroring the exact same pattern used in `add_to_playlist()`. The notification is only sent if the rater is not the original sharer (`song.shared_by != user_id`). Verified by having darius rate nova's song "Still Waters" — nova's notification count went from 1 to 2, with body "darius rated your song 'Still Waters' 4/5." Checked that rating one's own song does not trigger a self-notification.
 
 ---
 
@@ -159,6 +159,6 @@ Read `playlist_service.py`, specifically `get_playlist_songs()`. The last line r
 `songs[:-1]` is a Python slice that returns all elements except the last one. The query correctly fetches all songs ordered by position, but the return statement discards the final song in the list. This means the last song in every playlist is always excluded from the response, regardless of playlist size.
 
 **Fix and side-effect check:**
-*(To be filled in after fix is applied)*
+Changed `songs[:-1]` to `songs` in the return statement of `get_playlist_songs()`. Verified that "Late Night Vibes" (7 songs) now returns all 7 including the previously missing last song "Free Throws". Checked the other two playlists ("Friday Energy" — 7 songs, "Study Mode" — 7 songs) and confirmed all songs appear. No other logic in the function was touched.
 
 ---
