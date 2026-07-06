@@ -18,7 +18,7 @@ I used Claude during codebase orientation to read and summarize each service fil
 ### Main Files and Their Roles
 
 **`app.py`**
-Flask application factory. Creates the Flask app, configures SQLite as the database (`instance/mixtape.db`), initializes SQLAlchemy, and registers the four route blueprints (`/songs`, `/playlists`, `/users`, `/feed`). All app setup lives here — nothing runs directly from this file.
+Flask application factory. Creates the Flask app, configures SQLite as the database (`instance/mixtape.db`), initializes SQLAlchemy, and registers the four route blueprints (`/songs`, `/playlists`, `/users`, `/feed`).
 
 **`models.py`**
 Defines 6 SQLAlchemy models and 3 association tables:
